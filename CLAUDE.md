@@ -11,17 +11,21 @@ Korisnik komunicira na srpskom (latinica); odgovaraj na srpskom.
 - `mkv.py` — mkvmerge -J / mkvextract / mkvmerge, pronalaženje MKVToolNix-a
 - `subs.py` — parsiranje i upis SRT/ASS, transliteracija latinica → ćirilica
 - `translate.py` — Gemini (glavni) + OpenAI-kompatibilni rezervni servis (Groq/OpenRouter)
+- `opensubs.py` — OpenSubtitles.org XML-RPC (heš filma, prijava, TryUpload/Upload), spisak sačuvanih prevoda
+- `upload_dialog.py` — prozor za otpremanje
 - `pipeline.py` — izbor trake, serije od 60 redova + 4 reda konteksta, keš u `%APPDATA%\MKV Prevodilac\cache`
-- `tests/test_core.py` — 23 unit testa (`python -m pytest tests`), prevodilac je lažan
+- `tests/` — unit testovi (`python -m pytest tests`), prevodilac i OpenSubtitles server su lažni
 
 ## Odluke
 - API umesto lokalnog modela (bolji srpski); besplatni Gemini nivo, rezerva kad se potroši limit.
 - Ćirilica se pravi transliteracijom iz latiničkog prevoda (jedan poziv API-ja).
 - Ključevi su u `%APPDATA%\MKV Prevodilac\config.json` kao običan tekst.
+- Otpremanje na OpenSubtitles uvek šalje `automatictranslation=1`; to se ne sme ukloniti.
+- `certifi` je obavezan: Windows skladište sertifikata ne prihvata lanac api.opensubtitles.org (ISRG Root YE).
 
 ## Neprovereno / nije urađeno
-- Nikad nije testirano sa pravim API ključem: naziv modela `gemini-flash-lite-latest` i Groq model
-  `openai/gpt-oss-120b` nisu potvrđeni.
-- GUI nije ručno isproban na Windows-u.
+- Gemini prevod potvrđen u praksi (2026-11-15); Groq rezervni model nije proveren.
+- Otpremanje (UploadSubtitles) nije probano sa pravim nalogom; LogIn, SearchMoviesOnIMDB i TryUploadSubtitles rade.
+- User Agent nije registrovan kod OpenSubtitles-a; opensubtitles.com REST nije podržan.
 - Nema OCR-a za PGS/VobSub; ASS tagovi usred reda se gube.
 - `.exe` preko `build.bat` (PyInstaller) nije još napravljen; ideja za kasnije: MSI kao za PDF Alat.

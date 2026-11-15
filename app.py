@@ -15,7 +15,9 @@ from PySide6.QtWidgets import (
 )
 
 import mkv
+import opensubs
 from pipeline import Options, config_dir, process_file
+from upload_dialog import UploadDialog
 from translate import (
     Cancelled, GeminiProvider, OpenAICompatProvider, ProviderError, Translator,
 )
@@ -53,6 +55,8 @@ DEFAULTS = {
     "make_default": True,
     "save_external": False,
     "make_mkv": True,
+    "os_user": "",
+    "os_agent": opensubs.DEFAULT_USER_AGENT,
 }
 
 
@@ -136,6 +140,7 @@ class MainWindow(QWidget):
         self.thread: QThread | None = None
         self.worker: Worker | None = None
         self.tracks_cache: dict[str, list[mkv.Track]] = {}
+        self._os_pwd = ""  # lozinka za OpenSubtitles se ne čuva na disku
         self._build()
         self._load_into_ui()
 
@@ -230,6 +235,17 @@ class MainWindow(QWidget):
         f.addRow(warn)
         root.addWidget(g)
 
+        g = QGroupBox("5. OpenSubtitles.org")
+        h = QHBoxLayout(g)
+        lbl = QLabel("Svaki prevod se čuva, pa ga kasnije možeš otpremiti na opensubtitles.org "
+                     "(sa oznakom da je mašinski preveden).")
+        lbl.setWordWrap(True)
+        h.addWidget(lbl, 1)
+        b = QPushButton("Otpremi prevode…")
+        b.clicked.connect(self._open_upload)
+        h.addWidget(b)
+        root.addWidget(g)
+
         h = QHBoxLayout()
         self.btn_start = QPushButton("Pokreni prevod")
         self.btn_start.clicked.connect(self._start)
@@ -281,6 +297,8 @@ class MainWindow(QWidget):
             "fb_key": self.fb_key.text().strip(),
             "fb_model": self.fb_model.text().strip(),
             "mkv_dir": self.mkv_dir.text().strip(),
+            "os_user": self.cfg.get("os_user", ""),
+            "os_agent": self.cfg.get("os_agent", opensubs.DEFAULT_USER_AGENT),
         }
 
     # ---------------- fajlovi ----------------
@@ -357,6 +375,15 @@ class MainWindow(QWidget):
             except Exception as e:  # noqa: BLE001
                 lines.append(f"{p.name}: GREŠKA - {e}")
         QMessageBox.information(self, TITLE, "\n".join(lines))
+
+    def _open_upload(self):
+        dlg = UploadDialog(self, config_dir(), self.cfg.get("os_user", ""), self._os_pwd,
+                           self.cfg.get("os_agent", opensubs.DEFAULT_USER_AGENT), TITLE)
+        dlg.exec()
+        self._os_pwd = dlg.pwd.text()
+        self.cfg = {**self._read_cfg(), "os_user": dlg.user.text().strip(),
+                    "os_agent": dlg.agent.text().strip() or opensubs.DEFAULT_USER_AGENT}
+        save_cfg(self.cfg)
 
     def _start(self):
         cfg = self._read_cfg()

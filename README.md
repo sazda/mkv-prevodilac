@@ -20,11 +20,17 @@ Za .exe: `build.bat` -> `dist\MKV Prevodilac.exe`
    (`%APPDATA%\MKV Prevodilac\cache`), pa prekinut posao nastavlja tamo gde je stao.
 4. Ćirilica se pravi transliteracijom iz latinice (iz istog prevoda), tagovi se ne diraju.
 5. mkvmerge pravi `ime.sr.mkv` sa dodatim trakama "Srpski (latinica, AI)" / "Srpski (ćirilica, AI)".
+6. Prevod se čuva u `%APPDATA%\MKV Prevodilac\za_otpremanje`. Dugme "Otpremi prevode…" ga šalje na
+   opensubtitles.org (XML-RPC): film se prepoznaje po hešu originalnog videa ili traži po nazivu,
+   titl ide kao srpski (`scc`) i **uvek** sa oznakom "mašinski prevedeno". Potreban je nalog na
+   opensubtitles.org; lozinka se ne čuva na disku.
 
 ## Ograničenja
 - Slikoviti titlovi (PGS, VobSub) nisu podržani - treba OCR.
 - ASS: tagovi unutar reda (kurziv usred rečenice) se gube, početni ({\an8}) i crteži ostaju.
 - Ključevi su u `%APPDATA%\MKV Prevodilac\config.json` kao običan tekst.
+- OpenSubtitles traži registrovan User Agent za aplikacije; podrazumevani `MKVPrevodilac v1.0` nije registrovan.
+- opensubtitles.com (novi REST API) još nije podržan.
 - Besplatni nivoi imaju dnevne limite i mogu koristiti poslat tekst za poboljšanje servisa.
 
 ## Testovi

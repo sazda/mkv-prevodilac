@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Callable
 
 import mkv
+import opensubs
 import subs
 from translate import Cancelled, ProviderError, Translator
 
@@ -38,6 +39,7 @@ class Options:
     make_mkv: bool = True
     out_dir: str = ""
     batch_size: int = 60
+    keep_for_upload: bool = True  # sačuvaj prevod za kasnije otpremanje na OpenSubtitles
 
 
 def _unique(path: Path) -> Path:
@@ -138,15 +140,24 @@ def process_file(
             scripts.append(("cyr", "Srpski (ćirilica, AI)", f"{src.stem}.sr-cyrl"))
         new_subs: list[mkv.NewSub] = []
         created: list[Path] = []
+        rendered: dict[str, Path] = {}
         for i, (sc, name, base) in enumerate(scripts):
-            f = tmp / f"sr_{sc}.{sf.ext}"
+            f = tmp / f"{base}.{sf.ext}"
             f.write_text(sf.render(sc), "utf-8-sig")
+            rendered[sc] = f
             new_subs.append(mkv.NewSub(str(f), name, default=(opts.make_default and i == 0)))
             if opts.save_external:
                 ext_path = _unique(out_dir / f"{base}.{sf.ext}")
                 shutil.copyfile(f, ext_path)
                 created.append(ext_path)
                 log(f"  Sačuvan titl: {ext_path.name}")
+
+        if opts.keep_for_upload:
+            try:
+                opensubs.create_job(config_dir(), src, rendered)
+                log("  Prevod je sačuvan za otpremanje na OpenSubtitles.")
+            except Exception as e:  # noqa: BLE001 - otpremanje je dodatak, ne sme da obori prevod
+                log(f"  Upozorenje: prevod nije sačuvan za otpremanje: {e}")
 
         # 4) remux
         if opts.make_mkv:
