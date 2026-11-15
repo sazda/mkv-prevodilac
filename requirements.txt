@@ -1,0 +1,3 @@
+PySide6>=6.6
+pytest>=8        # samo za testove
+pyinstaller>=6   # samo za pravljenje .exe
