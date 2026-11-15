@@ -25,7 +25,7 @@ Korisnik komunicira na srpskom (latinica); odgovaraj na srpskom.
 
 ## Neprovereno / nije urađeno
 - Gemini prevod potvrđen u praksi (2026-11-15); Groq rezervni model nije proveren.
-- Otpremanje (UploadSubtitles) nije probano sa pravim nalogom; LogIn, SearchMoviesOnIMDB i TryUploadSubtitles rade.
+- Otpremanje na opensubtitles.org potvrđeno u praksi (2026-11-15).
 - User Agent nije registrovan kod OpenSubtitles-a; opensubtitles.com REST nije podržan.
 - Nema OCR-a za PGS/VobSub; ASS tagovi usred reda se gube.
-- `.exe` preko `build.bat` (PyInstaller) nije još napravljen; ideja za kasnije: MSI kao za PDF Alat.
+- `.exe` (build.bat, PyInstaller onefile, ~45 MB) radi; certifi se pakuje sam. Ideja za kasnije: MSI kao za PDF Alat.
